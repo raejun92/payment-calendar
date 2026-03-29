@@ -19,10 +19,20 @@ jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(() => ({ type: 'firestore' })),
 }));
 
+jest.mock('firebase/auth', () => ({
+  initializeAuth: jest.fn(() => ({ type: 'auth' })),
+  getReactNativePersistence: jest.fn(() => 'async-storage-persistence'),
+}));
+
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  default: {},
+}));
+
 describe('Firebase 초기화', () => {
   it('Firebase가 정상적으로 초기화된다', () => {
     const { initializeApp } = require('firebase/app');
     const { getFirestore } = require('firebase/firestore');
+    const { initializeAuth } = require('firebase/auth');
 
     require('@/services/firebase');
 
@@ -36,5 +46,6 @@ describe('Firebase 초기화', () => {
     });
 
     expect(getFirestore).toHaveBeenCalled();
+    expect(initializeAuth).toHaveBeenCalled();
   });
 });
