@@ -11,11 +11,12 @@ export interface Payment {
   createdAt: string;        // ISO 8601
 }
 
-export type BankCode = 'kb' | 'shinhan' | 'nh' | 'kakao';
+export type BankCode = 'kb' | 'shinhan' | 'nh' | 'kakao' | 'kbank';
 
 export const BankNames: Record<BankCode, string> = {
   kb: '국민은행',
   shinhan: '신한은행',
   nh: '농협은행',
   kakao: '카카오페이',
+  kbank: '케이뱅크',
 };

@@ -61,10 +61,11 @@ describe('BankNames', () => {
     expect(BankNames.shinhan).toBe('신한은행');
     expect(BankNames.nh).toBe('농협은행');
     expect(BankNames.kakao).toBe('카카오페이');
+    expect(BankNames.kbank).toBe('케이뱅크');
   });
 
-  it('4개의 은행을 지원한다', () => {
+  it('5개의 은행을 지원한다', () => {
     const bankCodes = Object.keys(BankNames) as BankCode[];
-    expect(bankCodes).toHaveLength(4);
+    expect(bankCodes).toHaveLength(5);
   });
 });

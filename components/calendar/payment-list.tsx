@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { formatCurrency } from '@/utils/calendar';
 import type { Payment } from '@/types/payment';
@@ -13,6 +13,8 @@ interface PaymentListProps {
   selectedDate: string;
   payments: Payment[];
   users: Record<string, UserInfo>;
+  onDelete?: (paymentId: string) => void;
+  onAdd?: () => void;
 }
 
 function getInitial(displayName: string): string {
@@ -32,10 +34,25 @@ function formatTime(time: string): string {
   return time.substring(0, 5);
 }
 
-export function PaymentList({ selectedDate, payments, users }: PaymentListProps) {
+function handleDeletePress(paymentId: string, onDelete?: (id: string) => void) {
+  if (!onDelete) return;
+  Alert.alert('삭제 확인', '이 결제 내역을 삭제하시겠습니까?', [
+    { text: '취소', style: 'cancel' },
+    { text: '삭제', style: 'destructive', onPress: () => onDelete(paymentId) },
+  ]);
+}
+
+export function PaymentList({ selectedDate, payments, users, onDelete, onAdd }: PaymentListProps) {
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.dateTitle}>{formatDate(selectedDate)}</ThemedText>
+      <View style={styles.dateHeader}>
+        <ThemedText style={styles.dateTitle}>{formatDate(selectedDate)}</ThemedText>
+        {onAdd && (
+          <TouchableOpacity onPress={onAdd} style={styles.addButton}>
+            <ThemedText style={styles.addButtonText}>+</ThemedText>
+          </TouchableOpacity>
+        )}
+      </View>
       {payments.length === 0 ? (
         <View style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>결제 내역이 없습니다</ThemedText>
@@ -50,7 +67,10 @@ export function PaymentList({ selectedDate, payments, users }: PaymentListProps)
             const color = user?.color ?? '#999';
 
             return (
-              <View style={styles.item}>
+              <TouchableOpacity
+                style={styles.item}
+                onLongPress={() => handleDeletePress(item.id, onDelete)}
+              >
                 <View style={[styles.initialBadge, { backgroundColor: color }]}>
                   <ThemedText style={styles.initialText}>{initial}</ThemedText>
                 </View>
@@ -59,7 +79,7 @@ export function PaymentList({ selectedDate, payments, users }: PaymentListProps)
                   {item.storeName ?? '결제'}
                 </ThemedText>
                 <ThemedText style={styles.amount}>{formatCurrency(item.amount)}</ThemedText>
-              </View>
+              </TouchableOpacity>
             );
           }}
         />
@@ -74,10 +94,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
   },
+  dateHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   dateTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 12,
+  },
+  addButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#007AFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '500',
+    marginTop: -1,
   },
   emptyContainer: {
     alignItems: 'center',
