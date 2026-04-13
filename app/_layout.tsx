@@ -35,18 +35,30 @@ function RootNavigator() {
     if (loading || !user || !group) return;
 
     const handleUrl = async (event: { url: string }) => {
-      // paymentcalendar://add 만 처리, 나머지는 Expo Router에 위임
-      if (!event.url.startsWith('paymentcalendar://add')) return;
+      if (!event.url.startsWith('paymentcalendar://add') && !event.url.startsWith('paymentcalendar://cancel')) return;
+
+      // Expo Router가 라우팅하기 전에 즉시 달력으로 이동
+      router.replace('/');
 
       try {
-        const success = await handleDeepLink(event.url, user.uid, group.id);
-        if (success) {
-          // 라우팅 되지 않도록 달력 화면으로 돌아감
-          router.replace('/');
-          Alert.alert('저장 완료', '결제 내역이 추가되었습니다.');
+        const result = await handleDeepLink(event.url, user.uid, group.id);
+
+        switch (result.type) {
+          case 'added':
+            Alert.alert('저장 완료', '결제 내역이 추가되었습니다.');
+            break;
+          case 'deleted':
+            Alert.alert('취소 완료', '결제 내역이 삭제되었습니다.');
+            break;
+          case 'multiple':
+            Alert.alert('확인 필요', '여러 건이 매칭됩니다. 수동으로 삭제해주세요.');
+            break;
+          case 'not_found':
+            Alert.alert('매칭 실패', '매칭되는 결제를 찾을 수 없습니다.');
+            break;
         }
       } catch {
-        // validation 실패 시 조용히 무시
+        // 처리 실패 시 조용히 무시
       }
     };
 
@@ -55,7 +67,7 @@ function RootNavigator() {
 
     // 앱이 URL로 열렸을 때 (콜드 스타트)
     Linking.getInitialURL().then((url) => {
-      if (url && url.startsWith('paymentcalendar://add')) handleUrl({ url });
+      if (url && url.startsWith('paymentcalendar://')) handleUrl({ url });
     });
 
     return () => subscription.remove();

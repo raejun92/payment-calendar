@@ -4,8 +4,17 @@ jest.mock('@/services/firebase', () => ({
 
 jest.mock('firebase/firestore', () => ({
   setDoc: jest.fn(),
+  getDoc: jest.fn(),
+  getDocs: jest.fn(),
   doc: jest.fn(),
+  collection: jest.fn(),
+  query: jest.fn(),
+  where: jest.fn(),
   serverTimestamp: jest.fn(() => 'SERVER_TIMESTAMP'),
+}));
+
+jest.mock('@/services/payments', () => ({
+  deletePayment: jest.fn(),
 }));
 
 import { parsePaymentUrl, validatePaymentParams } from '@/services/deep-link';
